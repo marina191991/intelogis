@@ -1,0 +1,45 @@
+version: '3'
+
+networks:
+  intelogis-network:
+
+services:
+  nginx:
+    container_name: nginx-intelogis
+    image: nginx:1.24
+    ports:
+      - '8080:80'
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./:/var/www/html
+    networks:
+      intelogis-network:
+    links:
+      - php-fpm
+
+  php-fpm:
+    container_name: php-fpm-intelogis
+    build:
+      context: .
+      dockerfile: docker/php-fpm/Dockerfile
+    volumes:
+      - ./:/var/www/html
+    networks:
+      intelogis-network:
+    links:
+      - mysql
+
+  mysql:
+    container_name: mysql-intelogis
+    image: mysql:5.7
+    ports:
+      - '3307:3306'
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_intelogis
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+    networks:
+      intelogis-network:
+
